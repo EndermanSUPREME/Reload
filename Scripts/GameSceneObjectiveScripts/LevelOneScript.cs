@@ -18,7 +18,7 @@ public class LevelOneScript : MonoBehaviour
     
     void Update()
     {
-        if (!securityDongle.active)
+        if (!securityDongle.activeSelf)
         {
             elevatorButton.material = buttonGreen;
             GetComponent<Collider>().enabled = true;
@@ -27,7 +27,7 @@ public class LevelOneScript : MonoBehaviour
 
     public void EnterNextLevel()
     {
-        if (!securityDongle.active)
+        if (!securityDongle.activeSelf)
         {
             GameObject.Find("BotNetAlert").GetComponent<LevelObjectiveList>().ObjectiveCompleted();
             GameObject.Find("ScreenFade").GetComponent<LevelTransitioning>().FadeIn();

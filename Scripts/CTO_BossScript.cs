@@ -69,13 +69,16 @@ public class CTO_BossScript : MonoBehaviour
             showHealth = healthScript.GetHealth(); // display health on inspector
         } else
             {
-                if (jumpingUp)
+                if (showHealth > 0)
                 {
-                    FollowJumpUp_Path(); // jump to a higher floor
-                } else
+                    if (jumpingUp)
                     {
-                        FollowJumpDown_Path(); // jump to a lower floor
-                    }
+                        FollowJumpUp_Path(); // jump to a higher floor
+                    } else
+                        {
+                            FollowJumpDown_Path(); // jump to a lower floor
+                        }
+                }
             }
     }
 
@@ -92,6 +95,15 @@ public class CTO_BossScript : MonoBehaviour
             {
                 AimArmAtPlayer();
             }
+        }
+    }
+
+    // Runs when the Object is set to active after being disabled
+    void OnEnable()
+    {
+        if (activate)
+        {
+            StartCoroutine(firingAtPlayer());
         }
     }
 
@@ -487,28 +499,31 @@ public class CTO_BossScript : MonoBehaviour
 
     void Shoot()
     {
-        Vector3 Target = new Vector3(Player.position.x, Player.position.y + 0.55f, Player.position.z);
-        
-        NavMeshPath navMeshPath = new NavMeshPath();
-        
-        if (agent.CalculatePath(Target, navMeshPath) && navMeshPath.status == NavMeshPathStatus.PathComplete)
+        if (agent.enabled)
         {
-            if (shoot) // shoot at the player and continue moving to them
+            Vector3 Target = new Vector3(Player.position.x, Player.position.y + 0.55f, Player.position.z);
+            
+            NavMeshPath navMeshPath = new NavMeshPath();
+            
+            if (agent.CalculatePath(Target, navMeshPath) && navMeshPath.status == NavMeshPathStatus.PathComplete)
             {
-                StartCoroutine(firingAtPlayer());
-            }
-        } else
-            { 
-                if (!moveToJumpPoint) // the player is in the air or at an unreachable destination that hasnt triggered the requirements to Jump
-                {
-                    speed = 0;
-                }
-
-                if (shoot) // shoot at the player even when we cant reach them
+                if (shoot) // shoot at the player and continue moving to them
                 {
                     StartCoroutine(firingAtPlayer());
                 }
-            }
+            } else
+                { 
+                    if (!moveToJumpPoint) // the player is in the air or at an unreachable destination that hasnt triggered the requirements to Jump
+                    {
+                        speed = 0;
+                    }
+    
+                    if (shoot) // shoot at the player even when we cant reach them
+                    {
+                        StartCoroutine(firingAtPlayer());
+                    }
+                }
+        }
     }
 
     IEnumerator firingAtPlayer() // rate of fire
@@ -598,7 +613,7 @@ public class CTO_BossScript : MonoBehaviour
         }
 
         // turns off the script on death
-        if (healthScript.GetHealth() < 1)
+        if (healthScript.GetHealth() <= 0)
         {
             activate = false;
             Destroy(CTO_HealthUI); // remove the UI component

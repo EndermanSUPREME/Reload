@@ -72,7 +72,7 @@ public class AudioFades : MonoBehaviour
             MusicComponent = GameObject.FindGameObjectsWithTag("Music");
             SFXComponent = GameObject.FindGameObjectsWithTag("SFX");
 
-            // BringMusicBack();
+            BringMusicBack();
         }
 
         if (transitionToScene)
@@ -80,7 +80,7 @@ public class AudioFades : MonoBehaviour
             MusicComponent = GameObject.FindGameObjectsWithTag("Music");
             SFXComponent = GameObject.FindGameObjectsWithTag("SFX");
             
-            // BringDownMusic();
+            BringDownMusic();
         }
 
         if (changingTracks)
@@ -88,7 +88,7 @@ public class AudioFades : MonoBehaviour
             MusicComponent = GameObject.FindGameObjectsWithTag("Music");
             SFXComponent = GameObject.FindGameObjectsWithTag("SFX");
             
-            // SwitchTheTracks();
+            SwitchTheTracks();
         }
     }
 

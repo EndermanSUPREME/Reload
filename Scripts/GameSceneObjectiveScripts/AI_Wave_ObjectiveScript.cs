@@ -8,16 +8,22 @@ public class AI_Wave_ObjectiveScript : MonoBehaviour
     [SerializeField] int NumberOfWaves, currentWave, NumberOfEnemiesPerWave, numberOfEnemiesSpawned;
     [SerializeField] GameObject AI_Pref;
     [SerializeField] Transform[] SpawnPoints;
-    bool FirstWaveSpawned = false;
+    bool FirstWaveSpawned = false, firstLoadedTrigger = false;
 
     void Start()
     {
-        StartCoroutine(FirstSpawn());
+        StartCoroutine(FirstSpawn(1.5f));
     }
 
-    IEnumerator FirstSpawn()
+    void OnEnable()
     {
-        yield return new WaitForSeconds(1.5f);
+        if (!FirstWaveSpawned && firstLoadedTrigger) StartCoroutine(FirstSpawn(0.5f));
+        firstLoadedTrigger = true;
+    }
+
+    IEnumerator FirstSpawn(float t)
+    {
+        yield return new WaitForSeconds(t);
         SpawningAI();
         FirstWaveSpawned = true;
     }

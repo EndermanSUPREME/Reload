@@ -174,6 +174,8 @@ public class DisableSecurityAndEliminateTheCTO : MonoBehaviour
         {
             if (collider.transform == playerCameraObj)
             {
+                // GameObject.FindObjectOfType<UI_Interface>().enabled = false;
+
                 // Boss Fight Commence
                 PlayerPrefs.SetInt("InCTO_Fight", 1);
                 GameObject.Find("PlayerCam").GetComponent<SaveGameData>().BuildSaveFile(); // save progress in level
@@ -205,6 +207,8 @@ public class DisableSecurityAndEliminateTheCTO : MonoBehaviour
 
     void PlayBossStartCutscene()
     {
+        // GameObject.FindObjectOfType<UI_Interface>().enabled = false;
+
         if (playerCameraObj != null)
         {
             playerCameraObj.gameObject.SetActive(false);
@@ -284,6 +288,7 @@ public class DisableSecurityAndEliminateTheCTO : MonoBehaviour
         GameObject.Find("ScreenFade").GetComponent<LevelTransitioning>().FadeOut();
         playerBodyObject.GetComponent<movement>().enabled = true;
 
+        // GameObject.FindObjectOfType<UI_Interface>().enabled = true;
         GiveReloadedPlayerTheirWeaponsFromSaveFile();
     }
 
@@ -291,6 +296,7 @@ public class DisableSecurityAndEliminateTheCTO : MonoBehaviour
 
     public void CTO_HasDied()
     {
+        // GameObject.FindObjectOfType<UI_Interface>().enabled = false;
         GameObject.Find("PlayerCam").GetComponent<Collider>().enabled = false;
 
         GameObject.Find("ScreenFade").GetComponent<LevelTransitioning>().FadeIn_Event();
@@ -334,6 +340,8 @@ public class DisableSecurityAndEliminateTheCTO : MonoBehaviour
 
         BossFightBarrier.SetActive(false);
 
+        // GameObject.FindObjectOfType<UI_Interface>().enabled = true;
+
         audioInterface = GameObject.Find("PlayerCam").GetComponent<AudioFades>();
         audioInterface.ChangeMusicTrack(0);
 
@@ -343,6 +351,8 @@ public class DisableSecurityAndEliminateTheCTO : MonoBehaviour
 
     public void GoToHelipad()
     {
+        // GameObject.FindObjectOfType<UI_Interface>().enabled = false;
+
         playerBodyObject.GetComponent<GoToNextScene>().GoingToNextLevel();
         GameObject.Find("BotNetAlert").GetComponent<LevelObjectiveList>().ObjectiveCompleted();
         

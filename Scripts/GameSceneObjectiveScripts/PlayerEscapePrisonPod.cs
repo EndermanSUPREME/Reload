@@ -11,6 +11,7 @@ public class PlayerEscapePrisonPod : MonoBehaviour
     public movement PlayerMovement;
     public Renderer buttonRend;
     public Material buttonGreen, buttonRed, enemyBodyPartMat;
+    [SerializeField] prisonCCTV_Camera podCam;
 
     void Update()
     {
@@ -21,7 +22,7 @@ public class PlayerEscapePrisonPod : MonoBehaviour
             doorDongle.transform.position = podGuard.transform.position + new Vector3(0, 0.75f, 0);
         }
 
-        if (!doorDongle.active)
+        if (!doorDongle.activeSelf)
         {
             disguiseObj.transform.position = doorDongle.transform.position;
         }
@@ -49,6 +50,8 @@ public class PlayerEscapePrisonPod : MonoBehaviour
 
         Invoke("DisguiseTransition", 2);
         disguiseObj.SetActive(false);
+
+        podCam.SetCameraToDefault();
     }
 
     void DisguiseTransition()
@@ -74,7 +77,7 @@ public class PlayerEscapePrisonPod : MonoBehaviour
 
     public void ScanPrisonDongle()
     {
-        if (!doorDongle.active)
+        if (!doorDongle.activeSelf)
         {
             openPodDoor = true;
             GameObject.Find("BotNetAlert").GetComponent<LevelObjectiveList>().ObjectiveCompleted();

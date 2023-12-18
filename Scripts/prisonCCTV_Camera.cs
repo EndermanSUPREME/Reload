@@ -13,7 +13,8 @@ public class prisonCCTV_Camera : MonoBehaviour
     public Material NormalLens, WatchingLens;
     LevelWideAlertness BotNetAlert;
     PrisonAlarm prisonAlarm;
-    [SerializeField] bool podCamera, nightTime = false, playerInCell, cameraCheck = false, triggeredAlarm = false;
+    [SerializeField] bool podCamera, nightTime = false, playerInCell,
+                    cameraCheck = false, triggeredAlarm = false, watchingPlayer = false;
 
     void Start()
     {
@@ -35,6 +36,12 @@ public class prisonCCTV_Camera : MonoBehaviour
     void FixedUpdate()
     {
         CameraVision();
+    }
+
+    // If all the camera arent detecting the player then we will reset the meter for the cameras
+    public bool isWatchingPlayer()
+    {
+        return watchingPlayer;
     }
 
     void CameraVision()
@@ -90,6 +97,7 @@ public class prisonCCTV_Camera : MonoBehaviour
                         }
                     } else
                         {
+                            watchingPlayer = true;
                             CameraLens.material = NormalLens;
                             fillLength = 0;
                         }
@@ -111,13 +119,29 @@ public class prisonCCTV_Camera : MonoBehaviour
         if (fillLength >= 0 && fillLength <= 1)
         {
             cameraAlertBar.localScale = new Vector3(1, fillLength, 1);
+
+            watchingPlayer = true;
         } else if (fillLength < 0)
             {
                 cameraAlertBar.localScale = new Vector3(1, 0, 1);
+
+                watchingPlayer = false;
             } else if (fillLength > 1)
                 {
                     cameraAlertBar.localScale = new Vector3(1, 1, 1);
+
+                    watchingPlayer = true;
                 }
+
+        // Debug.Log("[+] Camera can see the player :: " + watchingPlayer.ToString());
+    }
+
+    public void ResetCameraDetectionMeter()
+    {
+        fillLength = 0;
+        cameraAlertBar.localScale = new Vector3(1, 0, 1);
+
+        // Debug.Log("[*] Resetting Camera Bar");
     }
 
     public void ActivateNightCamera()
@@ -139,6 +163,11 @@ public class prisonCCTV_Camera : MonoBehaviour
             {
                 nightTime = true;
             }
+    }
+
+    public void SetCameraToDefault()
+    {
+        podCamera = false;
     }
 
     void OnDrawGizmosSelected()

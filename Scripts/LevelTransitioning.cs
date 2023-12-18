@@ -23,6 +23,8 @@ public class LevelTransitioning : MonoBehaviour
 
     public void FadeIn() // Changes Scene
     {
+        if (GameObject.FindObjectOfType<UI_Interface>() != null) GameObject.FindObjectOfType<UI_Interface>().enabled = false;
+
         if (ScreenFader != null)
         {
             ScreenFader.Play("FadeIn_Event");
@@ -41,6 +43,8 @@ public class LevelTransitioning : MonoBehaviour
 
     public void FadeIn_Event() // Doesnt Change Scene
     {
+        if (GameObject.FindObjectOfType<UI_Interface>() != null) GameObject.FindObjectOfType<UI_Interface>().enabled = false;
+
         if (ScreenFader != null)
         {
             ScreenFader.Play("FadeIn");
@@ -52,6 +56,8 @@ public class LevelTransitioning : MonoBehaviour
         if (ScreenFader != null)
         {
             ScreenFader.Play("FadeOut");
+
+            if (GameObject.FindObjectOfType<UI_Interface>() != null) GameObject.FindObjectOfType<UI_Interface>().enabled = true;
         }
     }
     

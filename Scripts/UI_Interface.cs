@@ -9,15 +9,30 @@ public class UI_Interface : MonoBehaviour
     private float musicVolume, sfxVolume, ResolutionIndex;
     [SerializeField] int menuIndex = 0, sliderSelectedIndex = 0;
     [SerializeField] Button[] mainMenuButtons, settingsButtons;
-    bool GamePaused = false, debugFrames = false, controllerPause = false, dpadPress = false, dpadPress2 = false, bodyHasBeenFound = false;
-    private int[] ScreenWidth = {800, 1024, 1152, 1280, 1280, 1440, 1600, 1920, 2560}, ScreenHeight = {600, 768, 864, 720, 1024, 900, 1200, 1080, 1440}; // [0, 8]
+    bool GamePaused = false, debugFrames = false, controllerPause = false, dpadPress = false,
+        dpadPress2 = false, bodyHasBeenFound = false, globalPause = false, exitingLevel = false;
     [SerializeField] Slider MusicSlider, SfxSlider, ResolutionSlider, Sensitivity_Slider;
     [SerializeField] Image[] sliderKnobs;
     [SerializeField] Sprite unSelected, Selected;
     GameObject[] MusicComponent, SFXComponent;
-    [SerializeField] GameObject HUD, Main, Setting;
+    [SerializeField] GameObject HUD, Main, Setting, ControlSchemeScreen;
     [SerializeField] Text MusicDisplay, SFX_Display, ResolutionDisplay, PlayerWarningText, ObjectiveDisplay, FPS_Display, Sensitivity_Display;
     public Weapons playerWeaponScript;
+    GameObject LevelScene;
+
+    void Awake()
+    {
+        // MusicComponent = GameObject.FindGameObjectsWithTag("Music");
+
+        ResolutionSlider.maxValue = Screen.resolutions.Length - 1;
+
+        // foreach (GameObject Sound in MusicComponent)
+        // {
+        //     Sound.GetComponent<AudioSource>().volume = 1;
+        // }
+
+        LevelScene = GameObject.Find("LevelObject");
+    }
 
     void Start()
     {
@@ -69,6 +84,14 @@ public class UI_Interface : MonoBehaviour
 
     void Update()
     {
+        if (LevelScene != null)
+        {
+            if (!exitingLevel) LevelScene.SetActive(!GetGlobalPause());
+        } else
+            {
+                LevelScene = GameObject.Find("LevelObject");
+            }
+
         if (GameObject.Find("BotNetAlert") != null)
         {
             if (ObjectiveDisplay != null)
@@ -93,12 +116,12 @@ public class UI_Interface : MonoBehaviour
                 }
         }
 
-        if (Setting.active && Setting != null)
+        if (Setting.activeSelf && Setting != null)
         {
             ResolutionIndex = ResolutionSlider.value;
             MusicDisplay.text = MusicSlider.value * 10 + " %";
             SFX_Display.text = SfxSlider.value * 10 + " %";
-            ResolutionDisplay.text = ScreenWidth[(int)ResolutionIndex] + "x" + ScreenHeight[(int)ResolutionIndex];
+            ResolutionDisplay.text = (Screen.resolutions[(int)ResolutionIndex].width).ToString() + "x" + (Screen.resolutions[(int)ResolutionIndex].height).ToString();
             Sensitivity_Display.text = Sensitivity_Slider.value.ToString();
 
             SetAudioSettings();
@@ -107,7 +130,7 @@ public class UI_Interface : MonoBehaviour
 
         if (SceneManager.GetActiveScene().buildIndex > 0 && SceneManager.GetActiveScene().buildIndex < SceneManager.sceneCountInBuildSettings)
         {
-            if (Setting != null)
+            if (Setting != null && !NotCutsceneArea())
             {
                 bool Escape = Input.GetKeyDown(KeyCode. Escape);
                 bool PauseButtonOnRemote = Input.GetButtonDown("remotePause");
@@ -155,7 +178,7 @@ public class UI_Interface : MonoBehaviour
 
                 if (GamePaused || controllerPause)
                 {
-                    Time.timeScale = 0;
+                    // Time.timeScale = 0;
                     GetComponent<AudioFades>().enabled = false;
                     
                     if (transform.GetComponent<mouse>() != null)
@@ -172,11 +195,13 @@ public class UI_Interface : MonoBehaviour
 
                         PlayerPrefs.SetInt("isGamePaused", 1);
                     }
+
+                    globalPause = true;
                 }
 
                 if (!GamePaused && !controllerPause)
                 {
-                    Time.timeScale = 1;
+                    // Time.timeScale = 1;
                     GetComponent<AudioFades>().enabled = true;
                     Invoke("AllowJumpMovementForPlayer", 0.05f);
 
@@ -188,6 +213,8 @@ public class UI_Interface : MonoBehaviour
 
                     Cursor.lockState = CursorLockMode.Locked;
                     Cursor.visible = false;
+
+                    globalPause = false;
 
                     PlayerPrefs.SetInt("isGamePaused", 0);
                 }
@@ -217,6 +244,11 @@ public class UI_Interface : MonoBehaviour
                     FPS_Display.text = "";
                 }
         }
+    }
+
+    public bool GetGlobalPause()
+    {
+        return globalPause;
     }
 
     void AllowJumpMovementForPlayer()
@@ -258,7 +290,7 @@ public class UI_Interface : MonoBehaviour
 
 //=================================================================================//
 
-        if (!Setting.active) // cycle in main menu buttons
+        if (!Setting.activeSelf) // cycle in main menu buttons
         {
             if (menuIndex > -1 && menuIndex < mainMenuButtons.Length)
             {
@@ -356,11 +388,21 @@ public class UI_Interface : MonoBehaviour
     {
         Screen.SetResolution(PlayerPrefs.GetInt("Width"), PlayerPrefs.GetInt("Height"), true);
 
+        // Debug.Log(PlayerPrefs.GetInt("Width").ToString() + ":" + PlayerPrefs.GetInt("Width").ToString());
+
         MusicSlider.value = PlayerPrefs.GetFloat("MusicVol") * 10;
         SfxSlider.value = PlayerPrefs.GetFloat("SFXVol") * 10;
         ResolutionSlider.value = PlayerPrefs.GetFloat("ResSlideVal");
 
+        // Debug.Log(PlayerPrefs.GetFloat("ResSlideVal"));
+
+        // Debug.Log(MusicSlider.value);
+        // Debug.Log(SfxSlider.value);
+
         Sensitivity_Slider.value = ((float) PlayerPrefs.GetInt("Sensitivity"));
+
+        SetResolutionSettings();
+        SetAudioSettings();
     }
 
     public void Set_SettingsFromFile(int rI, int mI, int sfxI, int s) // ================== Get Save Info ======================
@@ -380,10 +422,11 @@ public class UI_Interface : MonoBehaviour
     public void SetResolutionSettings()
     {
         ResolutionIndex = ResolutionSlider.value;
-        Screen.SetResolution(ScreenWidth[(int)ResolutionIndex], ScreenHeight[(int)ResolutionIndex], true);
 
-        PlayerPrefs.SetInt("Width", ScreenWidth[(int)ResolutionIndex]);
-        PlayerPrefs.SetInt("Height", ScreenHeight[(int)ResolutionIndex]);
+        Screen.SetResolution(Screen.resolutions[(int)ResolutionIndex].width, Screen.resolutions[(int)ResolutionIndex].height, true);
+
+        PlayerPrefs.SetInt("Width", Screen.width);
+        PlayerPrefs.SetInt("Height", Screen.height);
         PlayerPrefs.SetFloat("ResSlideVal", ResolutionSlider.value);
     }
 
@@ -399,6 +442,13 @@ public class UI_Interface : MonoBehaviour
 
     private void SetAudioSettings()
     {
+        AudioFades audioInterface = GameObject.Find("PlayerCam").GetComponent<AudioFades>();
+
+        if (audioInterface != null)
+        {
+            audioInterface.enabled = false;
+        }
+
         MusicComponent = GameObject.FindGameObjectsWithTag("Music");
         SFXComponent = GameObject.FindGameObjectsWithTag("SFX");
 
@@ -413,6 +463,8 @@ public class UI_Interface : MonoBehaviour
 
         if (MusicComponent != null && SFXComponent != null)
         {
+            // AudioListener.volume = musicVolume;
+
             foreach (GameObject Sound in MusicComponent)
             {
                 Sound.GetComponent<AudioSource>().volume = musicVolume;
@@ -440,6 +492,16 @@ public class UI_Interface : MonoBehaviour
     {
         PlayerWarningText.text = "Detected";
     }
+
+    public bool NotCutsceneArea()
+    {
+        if (SceneManager.GetActiveScene().buildIndex == 2 || SceneManager.GetActiveScene().buildIndex == 5 || SceneManager.GetActiveScene().buildIndex == 7 || SceneManager.GetActiveScene().buildIndex == 10 || SceneManager.GetActiveScene().buildIndex == 14)
+        {
+            return true;
+        }
+
+        return false;
+    }
     
 //======================= SCENE CHANGES ==========================
     public void StartTheGame()
@@ -454,6 +516,13 @@ public class UI_Interface : MonoBehaviour
     public void ReturnToMainMenuScene()
     {
         ResumeGame();
+
+        exitingLevel = true;
+
+        if (LevelScene != null)
+        {
+            LevelScene.SetActive(true);
+        }
         
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
@@ -478,6 +547,14 @@ public class UI_Interface : MonoBehaviour
         if (SceneManager.GetActiveScene().buildIndex != 0)
         {
             ResumeGame();
+
+            exitingLevel = true;
+
+            if (LevelScene != null)
+            {
+                LevelScene.SetActive(true);
+            }
+
             GetComponent<Collider>().enabled = false;
         }
 
@@ -516,24 +593,35 @@ public class UI_Interface : MonoBehaviour
 
         HUD.SetActive(false);
         Setting.SetActive(false);
+        ControlSchemeScreen.SetActive(false);
     }
 
     public void GoToMain() // Main Menu Scene
     {
-        Time.timeScale = 1;
+        // Time.timeScale = 1;
         
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
+
+        ResumeGame();
+
+        exitingLevel = true;
+
+        if (LevelScene != null)
+        {
+            LevelScene.SetActive(true);
+        }
 
         menuIndex = 0;
 
         Main.SetActive(true);
         Setting.SetActive(false);
+        ControlSchemeScreen.SetActive(false);
     }
 
     public void GoToSettings()
     {
-        Time.timeScale = 0;
+        // Time.timeScale = 0;
 
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
@@ -542,11 +630,28 @@ public class UI_Interface : MonoBehaviour
 
         HUD.SetActive(false);
         Setting.SetActive(true);
+        ControlSchemeScreen.SetActive(false);
+    }
+
+    public void GoToControlsScreen()
+    {
+        // Time.timeScale = 0;
+
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+
+        menuIndex = 0;
+
+        HUD.SetActive(false);
+        Setting.SetActive(false);
+        ControlSchemeScreen.SetActive(true);
     }
 
     public void ResumeGame() // InGame Scenes
     {
-        Time.timeScale = 1;
+        // Time.timeScale = 1;
+
+        // AudioListener.volume = 1;
 
         GamePaused = false;
         controllerPause = false;
@@ -556,10 +661,18 @@ public class UI_Interface : MonoBehaviour
             playerWeaponScript.enabled = true;
         }
 
+        ControlSchemeScreen.SetActive(false);
         Setting.SetActive(false);
         HUD.SetActive(true);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        AudioFades audioInterface = GameObject.Find("PlayerCam").GetComponent<AudioFades>();
+
+        if (audioInterface != null)
+        {
+            audioInterface.enabled = true;
+        }
     }
 }//EndScript

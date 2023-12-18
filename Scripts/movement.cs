@@ -17,15 +17,24 @@ public class movement : MonoBehaviour
 
     [SerializeField] AudioSource footStepOne, footStepTwo, jumpSound, landingSound;
     bool landedJump = true, replayWalkSound = true, controllerSprint = false;
+    UI_Interface ui;
+
+    void Start()
+    {
+        ui = GameObject.FindObjectOfType<UI_Interface>();
+    }
 
     // Update is called once per frame
     void Update()
     {
         Application.targetFrameRate = 65;
 
-        basicMovement();
-        jumpMechanic();
-        CrouchMechanic();
+        if (!ui.GetGlobalPause())
+        {
+            basicMovement();
+            jumpMechanic();
+            CrouchMechanic();
+        }
 
     } //End of Update
 

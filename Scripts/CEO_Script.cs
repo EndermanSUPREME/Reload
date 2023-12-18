@@ -80,6 +80,15 @@ public class CEO_Script : MonoBehaviour
             }
     }
 
+    // Runs when the Object is set to active after being disabled
+    void OnEnable()
+    {
+        if (!pacingHelipad)
+        {
+            StartCoroutine(firingAtPlayer());
+        }
+    }
+
     void LateUpdate()
     {
         if (!pacingHelipad)
@@ -178,6 +187,8 @@ public class CEO_Script : MonoBehaviour
         playerHead.GetComponent<AudioFades>().ChangeMusicTrack(1);
 
         playerMovementScript.enabled = true;
+        // GameObject.FindObjectOfType<UI_Interface>().enabled = true;
+
         pacingHelipad = false;
 
         agent.SetDestination(pacePositions[8].position);
@@ -190,6 +201,7 @@ public class CEO_Script : MonoBehaviour
             if (playerMovementScript != null)
             {
                 print("[-] Cant Move");
+                // GameObject.FindObjectOfType<UI_Interface>().enabled = false;
                 playerMovementScript.enabled = false;
             }
 

@@ -68,7 +68,13 @@ public class PrisonSchedule : MonoBehaviour
 
         yield return new WaitForSeconds(sec);
 
-        LightsOut();
+        if (PodCamera.transform.gameObject.activeSelf)
+        {
+            LightsOut();
+        } else
+        {
+            StartCoroutine(LevelCheck());
+        }
     }
 
     void LightsOut()
@@ -92,6 +98,19 @@ public class PrisonSchedule : MonoBehaviour
         }
 
         Invoke("CheckIfPlayerIsInCell", 30);
+    }
+
+    IEnumerator LevelCheck()
+    {
+        yield return new WaitForSeconds(1);
+
+        if (PodCamera.transform.gameObject.activeSelf)
+        {
+            LightsOut();
+        } else
+        {
+            StartCoroutine(LevelCheck());
+        }
     }
 
     public bool GetTimeOfDay()

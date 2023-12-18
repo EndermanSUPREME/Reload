@@ -45,7 +45,7 @@ public class SaveGameData : MonoBehaviour
             Directory.CreateDirectory(saveDir);
         }
 
-        Invoke("CheckForSettingsData", 0.25f);
+        // Invoke("CheckForSettingsData", 0.25f);
     }
 
     void Update()

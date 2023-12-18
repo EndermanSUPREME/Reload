@@ -276,10 +276,10 @@ public class HealthScript : MonoBehaviour
             GameObject.Find("ScreenFade").GetComponent<LevelTransitioning>().FadeIn();
             GameObject.Find("ScreenFade").GetComponent<LevelTransitioning>().SetNextInt(SceneManager.GetActiveScene().buildIndex);
             
-            // if (SceneManager.GetActiveScene().buildIndex > 8) // any scene from outside prison and after
-            // {
-            //     Destroy(GameObject.Find("playerBody"), 1.9f);
-            // }
+            if (SceneManager.GetActiveScene().buildIndex > 8) // any scene from outside prison and after
+            {
+                Destroy(GameObject.Find("playerBody"), 1.9f);
+            }
         }
 
         // player or enemy dies (ragdoll)

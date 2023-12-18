@@ -95,35 +95,38 @@ public class Weapons : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (SceneManager.GetActiveScene().buildIndex == 10)
+        if (!GetComponent<UI_Interface>().NotCutsceneArea())
         {
-            scroll_Int = 0;
-            weaponEquipped = scroll_Int;
-            Sheath();
-        }
-
-        if (!throwing)
-        {
-            EquippedWeapon();
-        } else
+            if (SceneManager.GetActiveScene().buildIndex == 10)
             {
-                if (pistol != null)
-                {
-                    pistol.SetActive(false);
-                }
-
-                if (knife != null)
-                {
-                    knife.SetActive(false);
-                }
-
-                if (rifle != null)
-                {
-                    rifle.SetActive(false);
-                }
+                scroll_Int = 0;
+                weaponEquipped = scroll_Int;
+                Sheath();
             }
-
-        ThrowableWeapon();
+    
+            if (!throwing)
+            {
+                EquippedWeapon();
+            } else
+                {
+                    if (pistol != null)
+                    {
+                        pistol.SetActive(false);
+                    }
+    
+                    if (knife != null)
+                    {
+                        knife.SetActive(false);
+                    }
+    
+                    if (rifle != null)
+                    {
+                        rifle.SetActive(false);
+                    }
+                }
+    
+            ThrowableWeapon();
+        }
     }
 
     void ThrowableWeapon()

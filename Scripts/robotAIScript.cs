@@ -15,7 +15,9 @@ public class robotAIScript : MonoBehaviour
 
     Vector3 directionToTarget;
 
-    bool alerted = false, playerFound = false, playerInDisguise = false, idle = false, OnGuard = false, fireAtPlayer = false, shotFired = false, fleeing = false, goingToAltPos = false, canSeePlayer = false;
+    bool alerted = false, playerFound = false, playerInDisguise = false,
+        idle = false, OnGuard = false, fireAtPlayer = false, shotFired = false,
+        fleeing = false, goingToAltPos = false, canSeePlayer = false, noticesPlayer = false;
 
     Animator robotAnim;
     Transform altPos;
@@ -68,7 +70,7 @@ public class robotAIScript : MonoBehaviour
             awarenessBar = GameObject.Find("RobotSuspisionBar").transform;
         }
 
-        agent.SetDestination(destinations[Random.Range(0, destinations.Length)].position);
+        if (agent.enabled) agent.SetDestination(destinations[Random.Range(0, destinations.Length)].position);
 
         speed = speedConst;
         agent.speed = speedConst;
@@ -84,6 +86,15 @@ public class robotAIScript : MonoBehaviour
 
     void Update()
     {
+        if (GameObject.Find("LevelObject") == null)
+        {
+            agent.enabled = false;
+            return;
+        } else
+            {
+                agent.enabled = true;
+            }
+
         if (GameObject.Find("playerBody") != null)
         {
             GameObject playerCamInScene = GameObject.Find("PlayerCam");
@@ -93,6 +104,11 @@ public class robotAIScript : MonoBehaviour
             Player = playerInScene.transform;
 
             PlayerUI = playerCamInScene.GetComponent<UI_Interface>();
+
+            if (GameObject.Find("RobotSuspisionBar") != null)
+            {
+                awarenessBar = GameObject.Find("RobotSuspisionBar").transform;
+            }
         }
 
         if (forceSetDestination)
@@ -109,7 +125,7 @@ public class robotAIScript : MonoBehaviour
 
             if (goingToAltPos && altPos != null)
             {
-                agent.SetDestination(altPos.position);
+                if (agent.enabled) agent.SetDestination(altPos.position);
             }
         } else
             {
@@ -203,14 +219,14 @@ public class robotAIScript : MonoBehaviour
                         robotAnim.Play("movement");
 
                         AdjustSpeed();
-                        agent.SetDestination(new Vector3(Player.position.x, Player.position.y - 0.5f, Player.position.z));
+                        if (agent.enabled) agent.SetDestination(new Vector3(Player.position.x, Player.position.y - 0.5f, Player.position.z));
                     }
         } else // no longer seen
             {
                 StopCoroutine(EnemyRateOfFire());
                 
                 AdjustSpeed();
-                agent.SetDestination(new Vector3(Player.position.x, Player.position.y - 0.5f, Player.position.z));
+                if (agent.enabled) agent.SetDestination(new Vector3(Player.position.x, Player.position.y - 0.5f, Player.position.z));
 
                 fireAtPlayer = false;
             }
@@ -273,26 +289,31 @@ public class robotAIScript : MonoBehaviour
                                     {
                                         fillLength = ((distFromPlayer - 8f) / -8f);
                                         awarenessBar.localScale = new Vector3(1, fillLength, 1);
+
+                                        noticesPlayer = true;
                                     } else if (distFromPlayer < 1)
                                         {
                                             fillLength = 1.5f;
                                             awarenessBar.localScale = new Vector3(1, 1, 1);
                                             AttackedByPlayer();
-                                        } else if (distFromPlayer > 5)
+                                        } else if (distFromPlayer > 8)
                                             {
                                                 fillLength = 0;
                                                 awarenessBar.localScale = new Vector3(1, 0, 1);
+                                                noticesPlayer = false;
                                             }
                                 }
                             }
                     } else
                         {
                            canSeePlayer = false;
+                           noticesPlayer = false;
                         }
                 }
             } else
                 {
                     canSeePlayer = false;
+                    noticesPlayer = false;
                 }
         }
     }
@@ -300,6 +321,19 @@ public class robotAIScript : MonoBehaviour
     public void PlayerWearingDisguise()
     {
         playerInDisguise = true;
+    }
+
+    public bool RobotSeesPlayer()
+    {
+        return noticesPlayer;
+    }
+
+    public void ResetRobotDetectionMeter()
+    {
+        fillLength = 0;
+        awarenessBar.localScale = new Vector3(1, 0, 1);
+
+        // Debug.Log("[*] Resetting Bar");
     }
 
     void FindDeadBodiesInView()
@@ -336,7 +370,7 @@ public class robotAIScript : MonoBehaviour
 
     private void ForceDestination()
     {
-        agent.SetDestination(destinations[Random.Range(0, destinations.Length)].position);
+        if (agent.enabled) agent.SetDestination(destinations[Random.Range(0, destinations.Length)].position);
         forceSetDestination = false;
     }
 
@@ -366,14 +400,14 @@ public class robotAIScript : MonoBehaviour
         agent.speed = speedConst;
 
         altPos = sentPos;
-        agent.SetDestination(sentPos.position);
+        if (agent.enabled) agent.SetDestination(sentPos.position);
     }
 
     public void GoToCell(Vector3 PrisonCellPos)
     {
         goingToAltPos = true;
         StopCoroutine(IdleDelay(0));
-        agent.SetDestination(PrisonCellPos);
+        if (agent.enabled) agent.SetDestination(PrisonCellPos);
     }
 
     public void LeaveCell()
@@ -392,7 +426,7 @@ public class robotAIScript : MonoBehaviour
         {
             if (!goingToAltPos)
             {
-                agent.SetDestination(destinations[Random.Range(0, destinations.Length)].position);
+                if (agent.enabled) agent.SetDestination(destinations[Random.Range(0, destinations.Length)].position);
                 agent.speed = speedConst;
             }
         }
@@ -432,7 +466,7 @@ public class robotAIScript : MonoBehaviour
 
         if (Vector3.Distance(AIPos, EndPt) < 0.05f)
         {
-            agent.SetDestination(destinations[Random.Range(0, destinations.Length)].position);
+            if (agent.enabled) agent.SetDestination(destinations[Random.Range(0, destinations.Length)].position);
         }
     }
 
@@ -453,7 +487,7 @@ public class robotAIScript : MonoBehaviour
 
     public void AttackedByPlayer()
     {
-        if (Hostile)
+        if (Hostile && PlayerUI != null)
         {
             PlayerUI.PlayerSpotted();
             playerFound = true;
